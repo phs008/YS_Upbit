@@ -31,23 +31,25 @@ namespace YS_Upbit
                 string filePath = ConfigurationManager.AppSettings["filepath"];
                 string access_key = ConfigurationManager.AppSettings["access_key"];
                 string secret_key = ConfigurationManager.AppSettings["secret_key"];
+                string telegram_token = ConfigurationManager.AppSettings["telegram_token"];
 
                 SetLog($"바라볼 폴더명 : {folderPath} 파일명 : {filePath} , Path : {folderPath}{filePath}");
+                InitFileWatcherEvent(folderPath, filePath);
+
 
                 if (!string.IsNullOrEmpty(access_key) && !string.IsNullOrEmpty(secret_key))
                 {
                     UpBitProcess.Instance.Init(access_key, secret_key);
+                    _marketListDic = UpBitProcess.Instance.GetMarketList();
                 }
 
-                _marketListDic = UpBitProcess.Instance.GetMarketList();
+                if (!string.IsNullOrEmpty(telegram_token))
+                {
+                    TelegramBotApi.Instance.Init(telegram_token);
+                }
 
-                FileSystemWatcher watcher = new FileSystemWatcher();
-                watcher.Path = folderPath;
-                watcher.Filter = filePath;
-                watcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName;
-                watcher.Created += YSFile_Changed;
-                watcher.Changed += YSFile_Changed;
-                watcher.EnableRaisingEvents = true;
+                
+
                 while (true)
                 {
                     if (Console.ReadKey().Key == ConsoleKey.Q)
@@ -55,8 +57,6 @@ namespace YS_Upbit
                         break;
                     }
                 }
-
-                
             }
             catch (Exception e)
             {
@@ -69,6 +69,17 @@ namespace YS_Upbit
                 Trace.Flush();
                 writer.Close();
             }
+        }
+
+        private static void InitFileWatcherEvent(string folderPath , string filePath)
+        {
+            FileSystemWatcher watcher = new FileSystemWatcher();
+            watcher.Path = folderPath;
+            watcher.Filter = filePath;
+            watcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName;
+            watcher.Created += YSFile_Changed;
+            watcher.Changed += YSFile_Changed;
+            watcher.EnableRaisingEvents = true;
         }
         private static void YSFile_Changed(object sender, FileSystemEventArgs e)
         {
@@ -88,7 +99,7 @@ namespace YS_Upbit
                             if (sr.Peek() == -1)
                             {
                                 SetLog($"마지막 -1 : {beforeLastLine} , 마지막 : {lastLine}");
-                                UpBitBuyAndSelling(beforeLastLine, lastLine);
+                                UpBitProcess.UpBitBuyAndSelling(beforeLastLine, lastLine);
                             }
                             else
                             {
@@ -104,42 +115,7 @@ namespace YS_Upbit
             }
         }
 
-        /// <summary>
-        /// YS 데이터 기반 매매 처리 함수
-        /// </summary>
-        /// <param name="beforeLastLine"></param>
-        /// <param name="lastLine"></param>
-        private static void UpBitBuyAndSelling(string beforeLastLine, string lastLine)
-        {
-            /// beforeLastLine 매매 신호 를 파싱해서 처리하고
-
-            Dictionary<string, string> bodyParam = new Dictionary<string, string>()
-            {
-                {"market", ""},
-                { "side" , "" },
-                { "volume" , "" },
-                { "price", "" },
-                { "ord_type" , "" }
-            };
-
-            var query = UpBitProcess.Instance.PayLoad(bodyParam);
-
-            /// lastLine 매매 신호를 파싱해서 처리한다.
-
-            bodyParam = new Dictionary<string, string>()
-            {
-                {"market", ""},
-                { "side" , "" },
-                { "volume" , "" },
-                { "price", "" },
-                { "ord_type" , "" }
-            };
-
-            query = UpBitProcess.Instance.PayLoad(bodyParam);
-
-        }
-
-        private static void SetLog(string message)
+        public static void SetLog(string message)
         {
             Console.WriteLine(message);
             Trace.WriteLine(message);

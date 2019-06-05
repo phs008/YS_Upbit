@@ -26,7 +26,7 @@ namespace YS_Upbit
 
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(requestUrl);
                 request.UserAgent = "Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US) AppleWebKit/534.7 (KHTML, like Gecko) Chrome/7.0.517.44 Safari/534.7";
-                request.Timeout = 2000;
+                request.Timeout = 5000;
                 request.ContentType = $"{contentType}; charset{encoding.WebName}";
                 request.Method = "GET";
                 if (isPost)
