@@ -33,14 +33,16 @@ namespace YS_Upbit
                 string secret_key = ConfigurationManager.AppSettings["secret_key"];
                 string telegram_token = ConfigurationManager.AppSettings["telegram_token"];
 
-                SetLog($"바라볼 폴더명 : {folderPath} 파일명 : {filePath} , Path : {folderPath}{filePath}");
-                InitFileWatcherEvent(folderPath, filePath);
+                //SetLog($"바라볼 폴더명 : {folderPath} 파일명 : {filePath} , Path : {folderPath}{filePath}");
+                //InitFileWatcherEvent(folderPath, filePath);
 
 
                 if (!string.IsNullOrEmpty(access_key) && !string.IsNullOrEmpty(secret_key))
                 {
-                    UpBitProcess.Instance.Init(access_key, secret_key);
-                    _marketListDic = UpBitProcess.Instance.GetMarketList();
+                    UpbitAPI.Instance.Init(access_key, secret_key);
+
+                    var markets = UpbitAPI.Instance.GetMarkets();
+                    var account = UpbitAPI.Instance.GetAccount();
                 }
 
                 if (!string.IsNullOrEmpty(telegram_token))
@@ -99,7 +101,6 @@ namespace YS_Upbit
                             if (sr.Peek() == -1)
                             {
                                 SetLog($"마지막 -1 : {beforeLastLine} , 마지막 : {lastLine}");
-                                UpBitProcess.UpBitBuyAndSelling(beforeLastLine, lastLine);
                             }
                             else
                             {
