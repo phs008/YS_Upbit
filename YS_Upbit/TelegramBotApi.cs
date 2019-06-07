@@ -11,6 +11,7 @@ namespace YS_Upbit
     public class TelegramBotApi
     {
         private static TelegramBotApi _telegramBotApi;
+        private static string _baseUri = string.Empty;
 
         public static TelegramBotApi Instance
         {
@@ -20,42 +21,37 @@ namespace YS_Upbit
         private string _telegramToken;
         private string _telegramId;
 
-        TelegramBotApi()
-        {
-            Task.Factory.StartNew(() =>
-            {
-                bool isGetTelegramId = false;
-                while (!isGetTelegramId)
-                {
-                    Thread.Sleep(1500);
-                    if (string.IsNullOrEmpty(_telegramToken))
-                        continue;
-
-                    string uri = $"https://api.telegram.org/bot{_telegramToken}/getUpdates";
-                    var response = HttpUtils.HttpGetRequest(uri, null);
-                    if (string.IsNullOrEmpty(response))
-                        continue;
-                    var resultObject = JObject.Parse(response);
-                    string responseResult = resultObject["ok"].Value<string>();
-                    if (responseResult == "True")
-                    {
-                        var result = resultObject["result"].Value<JArray>();
-                        if (result.Count == 0)
-                        {
-                            Program.SetLog("기입한 토근에 대한 텔레그램 봇을 활성해 해주세요");
-                            continue;
-                        }
-
-                        Program.SetLog("토근이 활성화 되었습니다");
-                    }
-                }
-            });
-
-        }
-
         public void Init(string token)
         {
             _telegramToken = token;
+            _baseUri = $"https://api.telegram.org/bot{_telegramToken}/";
+
+
+            bool isChatIdUpdated = false;
+            var api = _baseUri + "getUpdates";
+            var response = HttpUtils.HttpGetRequest(api, null);
+            var resultObject = JObject.Parse(response);
+
+            var result = resultObject["result"].Value<JArray>();
+            if (result.Count == 0)
+            {
+                throw new InvalidOperationException("기입한 토근에 대한 텔레그램 봇에 메세지를 한번 기입해 주세요");
+            }
+
+            var chatId = result["message"]["from"]["id"].Value<int>();
+            Program.SetLog("토근이 활성화 되었습니다");
+        }
+
+        public void SendMessage(string message)
+        {
+            var api = _baseUri + "sendMessage";
+            Dictionary<string, string> param = new Dictionary<string, string>()
+            {
+                {"chat_id", _telegramId},
+                {"text", message}
+            };
+            var result = HttpUtils.HttpGetRequest(api, param);
+            
         }
     }
 }

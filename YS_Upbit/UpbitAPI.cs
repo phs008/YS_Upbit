@@ -174,7 +174,7 @@ namespace YS_Upbit
         {
             var payload = new JwtPayload
             {
-                {"accsee_key", httpClient.AccessKey},
+                {"access_key", httpClient.AccessKey},
                 {"nonce", Guid.NewGuid().ToString()},
                 {"query_hash", ""},
                 {"query_hash_alg", "SHA512"}
