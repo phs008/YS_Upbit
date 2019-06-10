@@ -3,9 +3,9 @@ using System.Configuration;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using UpBit_Bridge;
+using YS_TelegramBot;
 
 namespace YS_Upbit
 {
@@ -32,6 +32,7 @@ namespace YS_Upbit
                 string access_key = ConfigurationManager.AppSettings["access_key"];
                 string secret_key = ConfigurationManager.AppSettings["secret_key"];
                 string telegram_token = ConfigurationManager.AppSettings["telegram_token"];
+                string telegram_chat_id = ConfigurationManager.AppSettings["telegram_char_id"];
 
                 SetLog($"바라볼 폴더명 : {folderPath} 파일명 : {filePath} , Path : {folderPath}{filePath}");
                 InitFileWatcherEvent(folderPath, filePath);
@@ -39,17 +40,15 @@ namespace YS_Upbit
 
                 if (!string.IsNullOrEmpty(access_key) && !string.IsNullOrEmpty(secret_key))
                 {
-                    UpbitAPI.Instance.Init(access_key, secret_key);
-                    var markets = UpbitAPI.Instance.GetMarkets();
-                    var account = UpbitAPI.Instance.GetAccount();
+                    UpBitBridge.Instance.Init(access_key, secret_key);
+                    //var account = UpbitAPI.Instance.GetAccount();
                 }
 
-                if (!string.IsNullOrEmpty(telegram_token))
+                if (!string.IsNullOrEmpty(telegram_token) && !string.IsNullOrEmpty(telegram_chat_id))
                 {
-                    TelegramBotApi.Instance.Init(telegram_token);
+                    TelegramBotApi.Instance.Init(telegram_token, telegram_chat_id);
                     TelegramBotApi.Instance.SendMessage("test");
                 }
-
                 
 
                 while (true)
@@ -79,7 +78,6 @@ namespace YS_Upbit
             watcher.Path = folderPath;
             watcher.Filter = filePath;
             watcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName;
-            watcher.Created += YSFile_Changed;
             watcher.Changed += YSFile_Changed;
             watcher.EnableRaisingEvents = true;
         }
@@ -91,7 +89,7 @@ namespace YS_Upbit
                 int charsize = encoding.GetByteCount("\n");
                 using (var fs = File.Open(e.FullPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 {
-                    using (var sr = new StreamReader(fs))
+                    using (var sr = new StreamReader(fs,Encoding.Default))
                     {
                         string beforeLastLine = "";
                         string lastLine = "";
@@ -101,7 +99,7 @@ namespace YS_Upbit
                             if (sr.Peek() == -1)
                             {
                                 SetLog($"마지막 -1 : {beforeLastLine} , 마지막 : {lastLine}");
-
+                                UpBitBridge.Instance.Order(lastLine);
                             }
                             else
                             {

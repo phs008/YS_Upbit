@@ -66,6 +66,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TelegramBotApi.cs" />
     <Compile Include="UpbitAPI.cs" />
+    <Compile Include="UpBitBridge.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

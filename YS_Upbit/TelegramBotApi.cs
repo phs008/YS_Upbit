@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
+﻿using System.Collections.Generic;
+using YS_Upbit;
 
-namespace YS_Upbit
+namespace YS_TelegramBot
 {
     public class TelegramBotApi
     {
@@ -19,26 +14,14 @@ namespace YS_Upbit
         }
 
         private string _telegramToken;
-        private string _telegramId;
+        private string _telegramChatId;
 
-        public void Init(string token)
+        public void Init(string token,string chatId)
         {
+            _baseUri = $"https://api.telegram.org/bot{token}/";
             _telegramToken = token;
-            _baseUri = $"https://api.telegram.org/bot{_telegramToken}/";
+            _telegramChatId = chatId;
 
-
-            bool isChatIdUpdated = false;
-            var api = _baseUri + "getUpdates";
-            var response = HttpUtils.HttpGetRequest(api, null);
-            var resultObject = JObject.Parse(response);
-
-            var result = resultObject["result"].Value<JArray>();
-            if (result.Count == 0)
-            {
-                throw new InvalidOperationException("기입한 토근에 대한 텔레그램 봇에 메세지를 한번 기입해 주세요");
-            }
-
-            var chatId = result["message"]["from"]["id"].Value<int>();
             Program.SetLog("토근이 활성화 되었습니다");
         }
 
@@ -47,7 +30,7 @@ namespace YS_Upbit
             var api = _baseUri + "sendMessage";
             Dictionary<string, string> param = new Dictionary<string, string>()
             {
-                {"chat_id", _telegramId},
+                {"chat_id", _telegramChatId},
                 {"text", message}
             };
             var result = HttpUtils.HttpGetRequest(api, param);

@@ -10,27 +10,27 @@ using System.Text;
 using System.Web;
 using Newtonsoft.Json.Linq;
 
-namespace YS_Upbit
+namespace UpbitApi
 {
-    public class UpbitAPI
+    class UpbitAPI
     {
         public MyHttpClient httpClient;
         
         private static bool IsSetInit = false;
 
         private static UpbitAPI _instance;
-        public static UpbitAPI Instance
+        internal static UpbitAPI Instance
         {
             get => _instance ?? (_instance = new UpbitAPI());
         }
 
-        public void Init(string accessKey, string secretKey)
+        internal void Init(string accessKey, string secretKey)
         {
             this.httpClient = new MyHttpClient(accessKey, secretKey);
             IsSetInit = true;
         }
 
-        public class MyHttpClient : HttpClient
+        internal class MyHttpClient : HttpClient
         {
             private string _accessKey;
             public string AccessKey
@@ -53,63 +53,63 @@ namespace YS_Upbit
             }
         }
 
-        public string GetAccount()
+        internal string GetAccount()
         {
             if (!IsSetInit)
                 throw new InvalidOperationException("Init 함수를 먼저 선언하세요");
             string url = "https://api.upbit.com/v1/accounts";
             return CallAPI_NoParam(url, HttpMethod.Get);
         }
-        public string GetTicker(string markets)
+        internal string GetTicker(string markets)
         {
             if (!IsSetInit)
                 throw new InvalidOperationException("Init 함수를 먼저 선언하세요");
             string url = "https://api.upbit.com/v1/ticker";
             return CallAPI_WithParam(url, new NameValueCollection { { "markets", markets } }, HttpMethod.Get);
         }
-        public string GetMarkets()
+        internal string GetMarkets()
         {
             if (!IsSetInit)
                 throw new InvalidOperationException("Init 함수를 먼저 선언하세요");
             string url = "https://api.upbit.com/v1/market/all";
             return CallAPI_NoParam(url, HttpMethod.Get);
         }
-        public string GetAllOrder()
+        internal string GetAllOrder()
         {
             if (!IsSetInit)
                 throw new InvalidOperationException("Init 함수를 먼저 선언하세요");
             string url = "https://api.upbit.com/v1/orders";
             return CallAPI_NoParam(url, HttpMethod.Get);
         }
-        public string GetOrder(string uuid)
+        internal string GetOrder(string uuid)
         {
             if (!IsSetInit)
                 throw new InvalidOperationException("Init 함수를 먼저 선언하세요");
             string url = "https://api.upbit.com/v1/order";
             return CallAPI_WithParam(url, new NameValueCollection { { "uuid", uuid } }, HttpMethod.Get);
         }
-        public string MakeOrder(string market, UpbitOrderSide side, decimal volume, decimal price, UpbitOrderType ord_type = UpbitOrderType.limit)
+        internal string MakeOrder(string market, UpbitOrderSide side, decimal volume, decimal price, UpbitOrderType ord_type = UpbitOrderType.limit)
         {
             if (!IsSetInit)
                 throw new InvalidOperationException("Init 함수를 먼저 선언하세요");
             string url = "https://api.upbit.com/v1/orders";
             return CallAPI_WithParam(url, new NameValueCollection { { "market", market }, { "side", side.ToString() }, { "volume", volume.ToString() }, { "price", price.ToString() }, { "ord_type", ord_type.ToString() } }, HttpMethod.Post);
         }
-        public string CancelOrder(string uuid)
+        internal string CancelOrder(string uuid)
         {
             if (!IsSetInit)
                 throw new InvalidOperationException("Init 함수를 먼저 선언하세요");
             string url = "https://api.upbit.com/v1/order";
             return CallAPI_WithParam(url, new NameValueCollection { { "uuid", uuid } }, HttpMethod.Delete);
         }
-        public string GetOrderbook(string markets)
+        internal string GetOrderbook(string markets)
         {
             if (!IsSetInit)
                 throw new InvalidOperationException("Init 함수를 먼저 선언하세요");
             string url = "https://api.upbit.com/v1/orderbook";
             return CallAPI_WithParam(url, new NameValueCollection { { "markets", markets } }, HttpMethod.Get);
         }
-        public string GetOrderChance(string market)
+        internal string GetOrderChance(string market)
         {
             if (!IsSetInit)
                 throw new InvalidOperationException("Init 함수를 먼저 선언하세요");
@@ -117,35 +117,35 @@ namespace YS_Upbit
             return CallAPI_WithParam(url, new NameValueCollection { { "market", market } }, HttpMethod.Get);
         }
 
-        public string GetCandles_Minute(string market, UpbitMinuteCandleType unit, DateTime to = default(DateTime), int count = 1)
+        internal string GetCandles_Minute(string market, UpbitMinuteCandleType unit, DateTime to = default(DateTime), int count = 1)
         {
             if (!IsSetInit)
                 throw new InvalidOperationException("Init 함수를 먼저 선언하세요");
             string url = "https://api.upbit.com/v1/candles/minutes/" + (int)unit;
             return CallAPI_WithParam(url, new NameValueCollection { { "market", market }, { "to", (to == default(DateTime)) ? DateTime2String(DateTime.Now) : DateTime2String(to) }, { "count", count.ToString() } }, HttpMethod.Get);
         }
-        public string GetCandles_Day(string market, DateTime to = default(DateTime), int count = 1)
+        internal string GetCandles_Day(string market, DateTime to = default(DateTime), int count = 1)
         {
             if (!IsSetInit)
                 throw new InvalidOperationException("Init 함수를 먼저 선언하세요");
             string url = "https://api.upbit.com/v1/candles/days";
             return CallAPI_WithParam(url, new NameValueCollection { { "market", market }, { "to", (to == default(DateTime)) ? DateTime2String(DateTime.Now) : DateTime2String(to) }, { "count", count.ToString() } }, HttpMethod.Get);
         }
-        public string GetCandles_Week(string market, DateTime to = default(DateTime), int count = 1)
+        internal string GetCandles_Week(string market, DateTime to = default(DateTime), int count = 1)
         {
             if (!IsSetInit)
                 throw new InvalidOperationException("Init 함수를 먼저 선언하세요");
             string url = "https://api.upbit.com/v1/candles/weeks";
             return CallAPI_WithParam(url, new NameValueCollection { { "market", market }, { "to", (to == default(DateTime)) ? DateTime2String(DateTime.Now) : DateTime2String(to) }, { "count", count.ToString() } }, HttpMethod.Get);
         }
-        public string GetCandles_Month(string market, DateTime to = default(DateTime), int count = 1)
+        internal string GetCandles_Month(string market, DateTime to = default(DateTime), int count = 1)
         {
             if (!IsSetInit)
                 throw new InvalidOperationException("Init 함수를 먼저 선언하세요");
             string url = "https://api.upbit.com/v1/candles/months";
             return CallAPI_WithParam(url, new NameValueCollection { { "market", market }, { "to", (to == default(DateTime)) ? DateTime2String(DateTime.Now) : DateTime2String(to) }, { "count", count.ToString() } }, HttpMethod.Get);
         }
-        public string GetTicks(string market, int count = 1)
+        internal string GetTicks(string market, int count = 1)
         {
             if (!IsSetInit)
                 throw new InvalidOperationException("Init 함수를 먼저 선언하세요");
